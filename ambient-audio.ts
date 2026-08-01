@@ -3,84 +3,77 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AtlasLogo } from "./AtlasLogo";
-import { soundManager } from "@/lib/sound";
 
-export interface SplashScreenProps {
-  onFinish: () => void;
+export interface LoadingScreenProps {
+  message?: string;
   streak?: number;
-  soundEnabled?: boolean;
 }
 
-export function SplashScreen({
-  onFinish,
+export function LoadingScreen({
+  message = "Loading ATLAS OS...",
   streak = 14,
-  soundEnabled = true,
-}: SplashScreenProps) {
-  const [stage, setStage] = useState<"logo" | "text" | "fadeout">("logo");
+}: LoadingScreenProps) {
+  const quotes = [
+    "Consistency beats motivation.",
+    "Keep climbing.",
+    "One day at a time.",
+    "Professionals show up.",
+    "The climb is the reward.",
+  ];
+
+  const [quoteIndex, setQuoteIndex] = useState(0);
 
   useEffect(() => {
-    soundManager.playCheck(soundEnabled);
-
-    const textTimer = setTimeout(() => {
-      setStage("text");
-    }, 700);
-
-    const fadeTimer = setTimeout(() => {
-      setStage("fadeout");
-    }, 2200);
-
-    const endTimer = setTimeout(() => {
-      onFinish();
-    }, 2800);
-
-    return () => {
-      clearTimeout(textTimer);
-      clearTimeout(fadeTimer);
-      clearTimeout(endTimer);
-    };
-  }, [onFinish, soundEnabled]);
+    const interval = setInterval(() => {
+      setQuoteIndex((i) => (i + 1) % quotes.length);
+    }, 2500);
+    return () => clearInterval(interval);
+  }, [quotes.length]);
 
   return (
-    <AnimatePresence>
+    <div className="min-h-[70vh] flex flex-col items-center justify-center p-6 text-center select-none">
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.6 }}
-        className="fixed inset-0 z-[100] bg-[#09090B] flex flex-col items-center justify-center select-none"
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
+        className="flex flex-col items-center space-y-6"
       >
-        {/* Subtle Ambient Radial Light */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-emerald-500/10 rounded-full blur-[140px] pointer-events-none" />
+        <AtlasLogo size="xl" variant="evolving" streak={streak} animated />
 
-        <div className="flex flex-col items-center justify-center space-y-6">
-          {/* Centered Evolving Logo */}
+        {/* Minimal Progress Bar */}
+        <div className="w-48 h-1 bg-zinc-800 rounded-full overflow-hidden">
           <motion.div
-            initial={{ opacity: 0, scale: 0.85 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-          >
-            <AtlasLogo size="3xl" variant="evolving" streak={streak} animated />
-          </motion.div>
-
-          {/* Title & Tagline */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{
-              opacity: stage === "text" || stage === "fadeout" ? 1 : 0,
-              y: stage === "text" || stage === "fadeout" ? 0 : 10,
+            initial={{ x: "-100%" }}
+            animate={{ x: "100%" }}
+            transition={{
+              duration: 1.4,
+              repeat: Infinity,
+              ease: "easeInOut",
             }}
-            transition={{ duration: 0.5 }}
-            className="text-center space-y-2"
-          >
-            <h1 className="text-4xl sm:text-5xl font-black text-white tracking-widest uppercase">
-              ATLAS
-            </h1>
-            <p className="text-xs sm:text-sm font-semibold tracking-[0.3em] text-emerald-400 uppercase">
-              Build. Create. Become.
-            </p>
-          </motion.div>
+            className="w-full h-full bg-gradient-to-r from-emerald-500 via-emerald-400 to-blue-500 rounded-full"
+          />
+        </div>
+
+        {/* Message and Rotating Quotes */}
+        <div className="space-y-1">
+          <div className="text-xs font-bold uppercase tracking-widest text-zinc-500">
+            {message}
+          </div>
+
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={quoteIndex}
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -5 }}
+              transition={{ duration: 0.4 }}
+              className="text-sm font-extrabold text-zinc-300 italic"
+            >
+              "{quotes[quoteIndex]}"
+            </motion.div>
+          </AnimatePresence>
         </div>
       </motion.div>
-    </AnimatePresence>
+    </div>
   );
 }

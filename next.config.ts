@@ -1,304 +1,144 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  Search,
-  Timer,
-  CheckSquare,
-  Briefcase,
-  DollarSign,
-  Palette,
-  Award,
-  Calendar,
-  BookOpen,
-  Target,
-  BarChart3,
-  Sparkles,
-  Image,
-  Quote,
-  Settings,
-  Flame,
-  X,
-  ArrowRight,
-  Download,
-  Compass,
-  Shield,
-} from "lucide-react";
-import { useAtlasStore, NavTab } from "@/store/atlas-store";
+import { Trophy, CheckCircle2, Flame, ArrowRight, X } from "lucide-react";
+import confetti from "canvas-confetti";
+import { soundManager } from "@/lib/sound";
+import { useAtlasStore } from "@/store/atlas-store";
+import { AtlasLogo } from "@/components/brand/AtlasLogo";
 
-export function CommandPaletteModal() {
-  const { isCmdOpen, setCmdOpen, setActiveTab, logPomodoro, rotateQuote } =
-    useAtlasStore();
-  const [query, setQuery] = useState("");
+export function MissionCompleteModal() {
+  const {
+    missionCompleteModalOpen,
+    setMissionCompleteModalOpen,
+    profile,
+    setActiveTab,
+  } = useAtlasStore();
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-        e.preventDefault();
-        setCmdOpen(!isCmdOpen);
-      }
-      if (e.key === "Escape" && isCmdOpen) {
-        setCmdOpen(false);
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isCmdOpen, setCmdOpen]);
+    if (missionCompleteModalOpen) {
+      soundManager.playVictory(profile.soundEnabled);
 
-  if (!isCmdOpen) return null;
+      // Trigger multi-stage confetti
+      const duration = 2.5 * 1000;
+      const animationEnd = Date.now() + duration;
 
-  const commands: {
-    id: string;
-    title: string;
-    category: string;
-    icon: any;
-    action: () => void;
-  }[] = [
-    {
-      id: "nav-promise",
-      title: "Open The Promise (Sacred Covenant & Milestone Wall)",
-      category: "Vision & Identity",
-      icon: Shield,
-      action: () => setActiveTab("promise"),
-    },
-    {
-      id: "nav-futureroom",
-      title: "Open The Future Room (Vision, Studio, Identity)",
-      category: "Vision & Identity",
-      icon: Compass,
-      action: () => setActiveTab("futureroom"),
-    },
-    {
-      id: "nav-whyatlas",
-      title: "Open Why Atlas? (Official Brand Identity & Evolving Logo)",
-      category: "Brand & System",
-      icon: Sparkles,
-      action: () => setActiveTab("whyatlas"),
-    },
-    {
-      id: "nav-dash",
-      title: "Go to Dashboard",
-      category: "Navigation",
-      icon: Flame,
-      action: () => setActiveTab("dashboard"),
-    },
-    {
-      id: "nav-missions",
-      title: "Open Daily Mission",
-      category: "Navigation",
-      icon: CheckSquare,
-      action: () => setActiveTab("missions"),
-    },
-    {
-      id: "nav-pomo",
-      title: "Open Pomodoro Focus Mode",
-      category: "Navigation",
-      icon: Timer,
-      action: () => setActiveTab("pomodoro"),
-    },
-    {
-      id: "nav-crm",
-      title: "Open Client CRM Pipeline",
-      category: "Navigation",
-      icon: Briefcase,
-      action: () => setActiveTab("crm"),
-    },
-    {
-      id: "nav-income",
-      title: "Open Income Tracker",
-      category: "Navigation",
-      icon: DollarSign,
-      action: () => setActiveTab("income"),
-    },
-    {
-      id: "nav-portfolio",
-      title: "Open Creative Portfolio Gallery",
-      category: "Navigation",
-      icon: Palette,
-      action: () => setActiveTab("portfolio"),
-    },
-    {
-      id: "nav-skills",
-      title: "Open Skill Tree & Level XP",
-      category: "Navigation",
-      icon: Sparkles,
-      action: () => setActiveTab("skills"),
-    },
-    {
-      id: "nav-trophy",
-      title: "Open Trophy Room & Achievements",
-      category: "Navigation",
-      icon: Award,
-      action: () => setActiveTab("achievements"),
-    },
-    {
-      id: "nav-calendar",
-      title: "Open Color-Coded Calendar",
-      category: "Navigation",
-      icon: Calendar,
-      action: () => setActiveTab("calendar"),
-    },
-    {
-      id: "nav-journal",
-      title: "Open Daily Markdown Journal",
-      category: "Navigation",
-      icon: BookOpen,
-      action: () => setActiveTab("journal"),
-    },
-    {
-      id: "nav-goals",
-      title: "Open Editable Goals",
-      category: "Navigation",
-      icon: Target,
-      action: () => setActiveTab("goals"),
-    },
-    {
-      id: "nav-analytics",
-      title: "Open Analytics & Heatmap",
-      category: "Navigation",
-      icon: BarChart3,
-      action: () => setActiveTab("analytics"),
-    },
-    {
-      id: "nav-aicoach",
-      title: "Open Atlas AI Coach Analysis",
-      category: "Navigation",
-      icon: Sparkles,
-      action: () => setActiveTab("aicoach"),
-    },
-    {
-      id: "nav-vision",
-      title: "Open Vision Board (Dream Studio, Gear)",
-      category: "Navigation",
-      icon: Image,
-      action: () => setActiveTab("visionboard"),
-    },
-    {
-      id: "nav-quotes",
-      title: "Open Motivational Quotes",
-      category: "Navigation",
-      icon: Quote,
-      action: () => setActiveTab("quotes"),
-    },
-    {
-      id: "nav-settings",
-      title: "Open OS Settings & Backup",
-      category: "Navigation",
-      icon: Settings,
-      action: () => setActiveTab("settings"),
-    },
-    {
-      id: "act-pomo-50",
-      title: "Quick Start: Log 50/10 Deep Work Session",
-      category: "Quick Actions",
-      icon: Timer,
-      action: async () => {
-        await logPomodoro(
-          50,
-          "50/10",
-          "Quick Focus Session from Command Palette"
-        );
-        setActiveTab("pomodoro");
-      },
-    },
-    {
-      id: "act-rotate-quote",
-      title: "Rotate Today's Motivational Quote",
-      category: "Quick Actions",
-      icon: Quote,
-      action: async () => {
-        await rotateQuote();
-      },
-    },
-    {
-      id: "act-export",
-      title: "Export Full JSON Backup",
-      category: "System",
-      icon: Download,
-      action: () => {
-        window.open("/api/backup", "_blank");
-      },
-    },
-  ];
+      const frame = () => {
+        confetti({
+          particleCount: 5,
+          angle: 60,
+          spread: 55,
+          origin: { x: 0 },
+          colors: ["#10B981", "#3B82F6", "#F59E0B"],
+        });
+        confetti({
+          particleCount: 5,
+          angle: 120,
+          spread: 55,
+          origin: { x: 1 },
+          colors: ["#10B981", "#3B82F6", "#F59E0B"],
+        });
 
-  const filtered = commands.filter(
-    (c) =>
-      c.title.toLowerCase().includes(query.toLowerCase()) ||
-      c.category.toLowerCase().includes(query.toLowerCase())
-  );
+        if (Date.now() < animationEnd) {
+          requestAnimationFrame(frame);
+        }
+      };
+      frame();
+    }
+  }, [missionCompleteModalOpen, profile.soundEnabled]);
+
+  if (!missionCompleteModalOpen) return null;
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-start justify-center pt-24 p-4 bg-black/70 backdrop-blur-sm">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
         <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: -10 }}
+          initial={{ opacity: 0, scale: 0.8, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: -10 }}
-          className="w-full max-w-xl bg-[#121215] border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden"
+          exit={{ opacity: 0, scale: 0.8, y: 20 }}
+          className="relative w-full max-w-md bg-[#121215] border border-emerald-500/30 rounded-3xl p-8 text-center shadow-2xl overflow-hidden"
         >
-          <div className="flex items-center px-4 py-3 border-b border-zinc-800 bg-zinc-900/50">
-            <Search className="w-5 h-5 text-zinc-500 mr-3" />
-            <input
-              type="text"
-              autoFocus
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Type a command or search screens... (Cmd + K)"
-              className="w-full bg-transparent text-white placeholder-zinc-500 focus:outline-none text-sm"
+          {/* Subtle glow background & Evolving Logo glowing behind the text */}
+          <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-48 h-48 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-15 pointer-events-none">
+            <AtlasLogo
+              size="hero"
+              variant="evolving"
+              streak={profile.currentStreak}
+              animated
             />
-            <button
-              onClick={() => setCmdOpen(false)}
-              className="p-1 text-zinc-500 hover:text-white rounded-lg transition"
-            >
-              <X className="w-4 h-4" />
-            </button>
           </div>
 
-          <div className="max-h-96 overflow-y-auto p-2 divide-y divide-zinc-800/40">
-            {filtered.length === 0 ? (
-              <div className="py-8 text-center text-zinc-500 text-sm">
-                No commands match "{query}"
+          <button
+            onClick={() => setMissionCompleteModalOpen(false)}
+            className="absolute top-4 right-4 p-2 text-zinc-400 hover:text-white rounded-full transition"
+          >
+            <X className="w-5 h-5" />
+          </button>
+
+          <motion.div
+            initial={{ rotate: -10, scale: 0 }}
+            animate={{ rotate: 0, scale: 1 }}
+            transition={{ type: "spring", stiffness: 200, delay: 0.1 }}
+            className="w-24 h-24 mx-auto mb-6 bg-gradient-to-tr from-emerald-500/20 via-emerald-500/10 to-transparent border border-emerald-500/40 rounded-full flex items-center justify-center shadow-emerald-500/20 shadow-xl"
+          >
+            <Trophy className="w-12 h-12 text-emerald-400" />
+          </motion.div>
+
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold uppercase tracking-widest mb-4">
+            <CheckCircle2 className="w-3.5 h-3.5" /> All Checklists Done
+          </div>
+
+          <h2 className="text-3xl font-black text-white tracking-tight mb-2">
+            MISSION COMPLETE
+          </h2>
+
+          <p className="text-zinc-400 text-sm mb-6 leading-relaxed">
+            You showed up, executed your daily discipline, and leveled up your creative OS.
+          </p>
+
+          <div className="flex items-center justify-center gap-4 bg-zinc-900/60 border border-zinc-800 rounded-2xl p-4 mb-6">
+            <div className="text-center">
+              <div className="text-xs text-zinc-500 uppercase tracking-wider mb-0.5">
+                Current Streak
               </div>
-            ) : (
-              filtered.map((cmd) => {
-                const Icon = cmd.icon;
-                return (
-                  <button
-                    key={cmd.id}
-                    onClick={() => {
-                      cmd.action();
-                      setCmdOpen(false);
-                    }}
-                    className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-zinc-800/80 text-left group transition"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-zinc-800 group-hover:bg-emerald-500/10 flex items-center justify-center text-zinc-400 group-hover:text-emerald-400 transition">
-                        <Icon className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <div className="text-sm font-medium text-zinc-200 group-hover:text-white transition">
-                          {cmd.title}
-                        </div>
-                        <div className="text-xs text-zinc-500">
-                          {cmd.category}
-                        </div>
-                      </div>
-                    </div>
-                    <ArrowRight className="w-4 h-4 text-zinc-600 group-hover:text-emerald-400 group-hover:translate-x-0.5 transition" />
-                  </button>
-                );
-              })
-            )}
+              <div className="text-lg font-bold text-orange-400 flex items-center justify-center gap-1">
+                <Flame className="w-4 h-4 fill-orange-400" />
+                {profile.currentStreak} Days
+              </div>
+            </div>
+            <div className="w-px h-8 bg-zinc-800" />
+            <div className="text-center">
+              <div className="text-xs text-zinc-500 uppercase tracking-wider mb-0.5">
+                Badge Unlocked
+              </div>
+              <div className="text-lg font-bold text-emerald-400">
+                🔥 7-Day Streak
+              </div>
+            </div>
           </div>
 
-          <div className="px-4 py-2 bg-zinc-900/80 border-t border-zinc-800 text-xs text-zinc-500 flex items-center justify-between">
-            <span>
-              Use <kbd className="px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300 font-mono">↑</kbd> <kbd className="px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300 font-mono">↓</kbd> to navigate
-            </span>
-            <span>
-              <kbd className="px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300 font-mono">ESC</kbd> to close
-            </span>
+          <div className="text-base font-medium text-emerald-300 italic mb-6">
+            "See you tomorrow."
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button
+              onClick={() => {
+                setMissionCompleteModalOpen(false);
+                setActiveTab("achievements");
+              }}
+              className="flex-1 px-5 py-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white font-semibold text-sm transition flex items-center justify-center gap-2"
+            >
+              Trophy Room <ArrowRight className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setMissionCompleteModalOpen(false)}
+              className="flex-1 px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-black font-bold text-sm transition shadow-lg shadow-emerald-600/20"
+            >
+              Done
+            </button>
           </div>
         </motion.div>
       </div>

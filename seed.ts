@@ -1,79 +1,57 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React from "react";
+import { motion } from "framer-motion";
 import { AtlasLogo } from "./AtlasLogo";
+import { Plus, ArrowRight } from "lucide-react";
 
-export interface LoadingScreenProps {
-  message?: string;
+export interface EmptyStateProps {
+  title: string;
+  subtitle: string;
+  actionLabel?: string;
+  onAction?: () => void;
   streak?: number;
+  className?: string;
 }
 
-export function LoadingScreen({
-  message = "Loading ATLAS OS...",
+export function EmptyState({
+  title,
+  subtitle,
+  actionLabel,
+  onAction,
   streak = 14,
-}: LoadingScreenProps) {
-  const quotes = [
-    "Consistency beats motivation.",
-    "Keep climbing.",
-    "One day at a time.",
-    "Professionals show up.",
-    "The climb is the reward.",
-  ];
-
-  const [quoteIndex, setQuoteIndex] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setQuoteIndex((i) => (i + 1) % quotes.length);
-    }, 2500);
-    return () => clearInterval(interval);
-  }, [quotes.length]);
-
+  className = "",
+}: EmptyStateProps) {
   return (
-    <div className="min-h-[70vh] flex flex-col items-center justify-center p-6 text-center select-none">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5 }}
-        className="flex flex-col items-center space-y-6"
-      >
-        <AtlasLogo size="xl" variant="evolving" streak={streak} animated />
+    <motion.div
+      initial={{ opacity: 0, scale: 0.98 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className={`bg-[#121215]/80 border border-zinc-800/80 rounded-3xl p-10 sm:p-14 text-center flex flex-col items-center justify-center space-y-6 select-none shadow-xl ${className}`}
+    >
+      <div className="relative">
+        <div className="absolute -inset-4 rounded-full bg-emerald-500/10 blur-xl pointer-events-none" />
+        <AtlasLogo size="2xl" variant="evolving" streak={streak} />
+      </div>
 
-        {/* Minimal Progress Bar */}
-        <div className="w-48 h-1 bg-zinc-800 rounded-full overflow-hidden">
-          <motion.div
-            initial={{ x: "-100%" }}
-            animate={{ x: "100%" }}
-            transition={{
-              duration: 1.4,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-            className="w-full h-full bg-gradient-to-r from-emerald-500 via-emerald-400 to-blue-500 rounded-full"
-          />
-        </div>
+      <div className="max-w-md space-y-2">
+        <h3 className="text-2xl font-black text-white tracking-tight">
+          {title}
+        </h3>
+        <p className="text-sm font-semibold text-emerald-400 italic">
+          "{subtitle}"
+        </p>
+      </div>
 
-        {/* Message and Rotating Quotes */}
-        <div className="space-y-1">
-          <div className="text-xs font-bold uppercase tracking-widest text-zinc-500">
-            {message}
-          </div>
-
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={quoteIndex}
-              initial={{ opacity: 0, y: 5 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -5 }}
-              transition={{ duration: 0.4 }}
-              className="text-sm font-extrabold text-zinc-300 italic"
-            >
-              "{quotes[quoteIndex]}"
-            </motion.div>
-          </AnimatePresence>
-        </div>
-      </motion.div>
-    </div>
+      {onAction && actionLabel && (
+        <button
+          onClick={onAction}
+          className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-emerald-400 to-blue-500 text-black font-black text-xs uppercase tracking-widest transition shadow-lg shadow-emerald-500/20 flex items-center gap-2 hover:scale-105 active:scale-98"
+        >
+          <Plus className="w-4 h-4" />
+          <span>{actionLabel}</span>
+          <ArrowRight className="w-4 h-4 ml-1" />
+        </button>
+      )}
+    </motion.div>
   );
 }

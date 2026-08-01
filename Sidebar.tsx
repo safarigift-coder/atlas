@@ -1,59 +1,38 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { portfolioProjects, calendarDays } from "@/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { portfolioProjects } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
-export async function POST(req: NextRequest) {
+export async function PUT(
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
+    const params = await context.params;
+    const id = Number(params.id);
     const body = await req.json();
-    const {
-      title,
-      category,
-      thumbnail,
-      description,
-      toolsUsed,
-      completionDate,
-      client,
-      behanceLink,
-      liveWebsite,
-      status,
-    } = body;
 
-    const todayStr = completionDate || new Date().toISOString().split("T")[0];
-
-    const inserted = await db
-      .insert(portfolioProjects)
-      .values({
-        title: title || "New Creative Project",
-        category: category || "UI Design",
-        thumbnail:
-          thumbnail ||
-          "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80",
-        description: description || "Project description and case study.",
-        toolsUsed: toolsUsed || "Figma, Next.js, Framer Motion",
-        completionDate: todayStr,
-        client: client || "Personal Project",
-        behanceLink: behanceLink || "https://behance.net",
-        liveWebsite: liveWebsite || "https://example.com",
-        status: status || "Completed",
-      })
+    const updated = await db
+      .update(portfolioProjects)
+      .set({ ...body })
+      .where(eq(portfolioProjects.id, id))
       .returning();
 
-    // Increment calendar day projectsCompleted
-    const calRows = await db
-      .select()
-      .from(calendarDays)
-      .where(eq(calendarDays.date, todayStr));
-    if (calRows.length > 0) {
-      await db
-        .update(calendarDays)
-        .set({
-          projectsCompleted: sql`projects_completed + 1`,
-        })
-        .where(eq(calendarDays.date, todayStr));
-    }
+    return NextResponse.json({ success: true, project: updated[0] });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}
 
-    return NextResponse.json({ success: true, project: inserted[0] });
+export async function DELETE(
+  _req: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
+  try {
+    const params = await context.params;
+    const id = Number(params.id);
+    await db.delete(portfolioProjects).where(eq(portfolioProjects.id, id));
+    return NextResponse.json({ success: true });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

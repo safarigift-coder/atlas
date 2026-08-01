@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { visionBoardItems } from "@/db/schema";
+import { goals } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 export async function PUT(
@@ -13,12 +13,12 @@ export async function PUT(
     const body = await req.json();
 
     const updated = await db
-      .update(visionBoardItems)
+      .update(goals)
       .set({ ...body })
-      .where(eq(visionBoardItems.id, id))
+      .where(eq(goals.id, id))
       .returning();
 
-    return NextResponse.json({ success: true, item: updated[0] });
+    return NextResponse.json({ success: true, goal: updated[0] });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
@@ -31,7 +31,7 @@ export async function DELETE(
   try {
     const params = await context.params;
     const id = Number(params.id);
-    await db.delete(visionBoardItems).where(eq(visionBoardItems.id, id));
+    await db.delete(goals).where(eq(goals.id, id));
     return NextResponse.json({ success: true });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });

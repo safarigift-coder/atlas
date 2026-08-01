@@ -1,13 +1,28 @@
+import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { sql } from "drizzle-orm";
+import { goals } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
-export const dynamic = "force-dynamic";
-
-export async function GET() {
+export async function POST(req: NextRequest) {
   try {
-    await db.execute(sql`select 1`);
-    return Response.json({ ok: true });
-  } catch {
-    return Response.json({ ok: false }, { status: 500 });
+    const body = await req.json();
+    const { title, category, targetValue, currentValue, unit, completed } =
+      body;
+
+    const inserted = await db
+      .insert(goals)
+      .values({
+        title: title || "New Creative Goal",
+        category: category || "Career",
+        targetValue: Number(targetValue) || 100,
+        currentValue: Number(currentValue) || 0,
+        unit: unit || "%",
+        completed: Boolean(completed),
+      })
+      .returning();
+
+    return NextResponse.json({ success: true, goal: inserted[0] });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
