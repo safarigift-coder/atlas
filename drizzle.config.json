@@ -1,0 +1,285 @@
+"use client";
+
+import React from "react";
+import {
+  Flame,
+  CheckSquare,
+  Timer,
+  Briefcase,
+  DollarSign,
+  Palette,
+  Sparkles,
+  Award,
+  Calendar,
+  BookOpen,
+  Target,
+  BarChart3,
+  Image,
+  Quote,
+  Settings,
+  Terminal,
+  Volume2,
+  VolumeX,
+  Compass,
+  Shield,
+} from "lucide-react";
+import { useAtlasStore, NavTab } from "@/store/atlas-store";
+import { AtlasLogo } from "@/components/brand/AtlasLogo";
+
+interface NavGroup {
+  label: string;
+  items: {
+    id: NavTab;
+    name: string;
+    icon: any;
+    badge?: string;
+    badgeColor?: string;
+  }[];
+}
+
+export function Sidebar() {
+  const {
+    activeTab,
+    setActiveTab,
+    profile,
+    dailyMissions,
+    clients,
+    portfolioProjects,
+    setCmdOpen,
+  } = useAtlasStore();
+
+  const activeClientsCount = clients.filter(
+    (c) =>
+      c.status === "Working" ||
+      c.status === "Negotiation" ||
+      c.status === "Proposal Sent" ||
+      c.status === "Revision"
+  ).length;
+
+  const missionsCompleted = dailyMissions.filter((m) => m.completed).length;
+  const missionsTotal = dailyMissions.length;
+
+  const groups: NavGroup[] = [
+    {
+      label: "VISION & IDENTITY",
+      items: [
+        {
+          id: "promise",
+          name: "The Promise",
+          icon: Shield,
+          badge: "SACRED",
+          badgeColor: "text-emerald-400 bg-emerald-500/10 border-emerald-500/30",
+        },
+        {
+          id: "futureroom",
+          name: "The Future Room",
+          icon: Compass,
+          badge: "ENTER",
+          badgeColor: "text-blue-400 bg-blue-500/10 border-blue-500/30",
+        },
+      ],
+    },
+    {
+      label: "CORE SYSTEM",
+      items: [
+        {
+          id: "dashboard",
+          name: "Dashboard",
+          icon: Flame,
+          badge: `${profile.currentStreak}d`,
+          badgeColor: "text-orange-400 bg-orange-500/10 border-orange-500/30",
+        },
+        {
+          id: "missions",
+          name: "Daily Mission",
+          icon: CheckSquare,
+          badge: `${missionsCompleted}/${missionsTotal}`,
+          badgeColor:
+            missionsCompleted === missionsTotal && missionsTotal > 0
+              ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/30"
+              : "text-zinc-400 bg-zinc-800",
+        },
+        {
+          id: "pomodoro",
+          name: "Pomodoro Focus Mode",
+          icon: Timer,
+        },
+      ],
+    },
+    {
+      label: "BUSINESS & CREATIVE",
+      items: [
+        {
+          id: "crm",
+          name: "Client CRM",
+          icon: Briefcase,
+          badge: activeClientsCount > 0 ? `${activeClientsCount}` : undefined,
+          badgeColor: "text-blue-400 bg-blue-500/10 border-blue-500/30",
+        },
+        {
+          id: "income",
+          name: "Income Tracker",
+          icon: DollarSign,
+        },
+        {
+          id: "portfolio",
+          name: "Portfolio Gallery",
+          icon: Palette,
+          badge: `${portfolioProjects.length}`,
+          badgeColor: "text-zinc-400 bg-zinc-800",
+        },
+        {
+          id: "skills",
+          name: "Skill Tree",
+          icon: Sparkles,
+        },
+      ],
+    },
+    {
+      label: "DISCIPLINE & GROWTH",
+      items: [
+        { id: "legacy", name: "Legacy System", icon: Compass },
+        { id: "achievements", name: "Achievements", icon: Award },
+        { id: "calendar", name: "Calendar", icon: Calendar },
+        { id: "journal", name: "Journal", icon: BookOpen },
+        { id: "goals", name: "Goals", icon: Target },
+        { id: "analytics", name: "Analytics", icon: BarChart3 },
+      ],
+    },
+    {
+      label: "MINDSET & SETUP",
+      items: [
+        { id: "whyatlas", name: "Why Atlas? (Brand)", icon: Sparkles },
+        { id: "aicoach", name: "Atlas AI Mentor", icon: Sparkles },
+        { id: "visionboard", name: "Vision Board", icon: Image },
+        { id: "quotes", name: "Quotes", icon: Quote },
+        { id: "settings", name: "Settings", icon: Settings },
+      ],
+    },
+  ];
+
+  return (
+    <aside className="hidden lg:flex flex-col w-64 h-screen border-r border-zinc-800/80 bg-[#09090B] text-zinc-300 select-none sticky top-0">
+      {/* Brand Header */}
+      <div className="p-5 border-b border-zinc-800/80 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <AtlasLogo
+            size="md"
+            variant="evolving"
+            streak={profile.currentStreak}
+            animated
+          />
+          <div>
+            <div className="font-extrabold text-white text-sm tracking-tight flex items-center gap-1.5">
+              ATLAS <span className="text-emerald-400">OS</span>
+            </div>
+            <div className="text-[10px] uppercase font-semibold text-zinc-500 tracking-widest">
+              v3.0 • Executive
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Command Palette Button */}
+      <div className="px-3 pt-3">
+        <button
+          onClick={() => setCmdOpen(true)}
+          className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800/80 text-zinc-400 hover:text-white text-xs transition group"
+        >
+          <span className="flex items-center gap-2 font-medium">
+            <Terminal className="w-3.5 h-3.5 text-emerald-400" />
+            Command Palette
+          </span>
+          <kbd className="px-1.5 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-[10px] font-mono text-zinc-300 group-hover:border-emerald-500/40 transition">
+            ⌘K
+          </kbd>
+        </button>
+      </div>
+
+      {/* Navigation Groups */}
+      <div className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
+        {groups.map((group) => (
+          <div key={group.label}>
+            <div className="px-3 mb-2 text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+              {group.label}
+            </div>
+            <div className="space-y-0.5">
+              {group.items.map((item) => {
+                const Icon = item.icon;
+                const isActive = activeTab === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => setActiveTab(item.id)}
+                    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium transition ${
+                      isActive
+                        ? "bg-zinc-800/90 text-white shadow-sm border border-zinc-700/60"
+                        : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <Icon
+                        className={`w-4 h-4 transition ${
+                          isActive
+                            ? "text-emerald-400"
+                            : "text-zinc-500 group-hover:text-zinc-300"
+                        }`}
+                      />
+                      <span className="truncate">{item.name}</span>
+                    </div>
+                    {item.badge && (
+                      <span
+                        className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${
+                          item.badgeColor || "text-zinc-400 bg-zinc-800"
+                        }`}
+                      >
+                        {item.badge}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* User Status Footer */}
+      <div className="p-4 border-t border-zinc-800/80 bg-zinc-900/30 flex items-center justify-between">
+        <div className="flex items-center gap-2.5 truncate">
+          <div className="w-8 h-8 rounded-full overflow-hidden border border-emerald-500/40 shrink-0">
+            <img
+              src={profile.profilePhotoUrl}
+              alt={profile.name}
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <div className="truncate">
+            <div className="text-xs font-semibold text-white truncate">
+              {profile.name}
+            </div>
+            <div className="text-[10px] text-amber-400 font-bold truncate">
+              Level {profile.level} • {profile.levelTitle}
+            </div>
+          </div>
+        </div>
+
+        <button
+          onClick={() => {
+            useAtlasStore
+              .getState()
+              .updateProfile({ soundEnabled: !profile.soundEnabled });
+          }}
+          title={profile.soundEnabled ? "Mute sound effects" : "Unmute sound effects"}
+          className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition"
+        >
+          {profile.soundEnabled ? (
+            <Volume2 className="w-4 h-4 text-emerald-400" />
+          ) : (
+            <VolumeX className="w-4 h-4 text-zinc-600" />
+          )}
+        </button>
+      </div>
+    </aside>
+  );
+}

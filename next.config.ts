@@ -1,0 +1,307 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Search,
+  Timer,
+  CheckSquare,
+  Briefcase,
+  DollarSign,
+  Palette,
+  Award,
+  Calendar,
+  BookOpen,
+  Target,
+  BarChart3,
+  Sparkles,
+  Image,
+  Quote,
+  Settings,
+  Flame,
+  X,
+  ArrowRight,
+  Download,
+  Compass,
+  Shield,
+} from "lucide-react";
+import { useAtlasStore, NavTab } from "@/store/atlas-store";
+
+export function CommandPaletteModal() {
+  const { isCmdOpen, setCmdOpen, setActiveTab, logPomodoro, rotateQuote } =
+    useAtlasStore();
+  const [query, setQuery] = useState("");
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setCmdOpen(!isCmdOpen);
+      }
+      if (e.key === "Escape" && isCmdOpen) {
+        setCmdOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isCmdOpen, setCmdOpen]);
+
+  if (!isCmdOpen) return null;
+
+  const commands: {
+    id: string;
+    title: string;
+    category: string;
+    icon: any;
+    action: () => void;
+  }[] = [
+    {
+      id: "nav-promise",
+      title: "Open The Promise (Sacred Covenant & Milestone Wall)",
+      category: "Vision & Identity",
+      icon: Shield,
+      action: () => setActiveTab("promise"),
+    },
+    {
+      id: "nav-futureroom",
+      title: "Open The Future Room (Vision, Studio, Identity)",
+      category: "Vision & Identity",
+      icon: Compass,
+      action: () => setActiveTab("futureroom"),
+    },
+    {
+      id: "nav-whyatlas",
+      title: "Open Why Atlas? (Official Brand Identity & Evolving Logo)",
+      category: "Brand & System",
+      icon: Sparkles,
+      action: () => setActiveTab("whyatlas"),
+    },
+    {
+      id: "nav-dash",
+      title: "Go to Dashboard",
+      category: "Navigation",
+      icon: Flame,
+      action: () => setActiveTab("dashboard"),
+    },
+    {
+      id: "nav-missions",
+      title: "Open Daily Mission",
+      category: "Navigation",
+      icon: CheckSquare,
+      action: () => setActiveTab("missions"),
+    },
+    {
+      id: "nav-pomo",
+      title: "Open Pomodoro Focus Mode",
+      category: "Navigation",
+      icon: Timer,
+      action: () => setActiveTab("pomodoro"),
+    },
+    {
+      id: "nav-crm",
+      title: "Open Client CRM Pipeline",
+      category: "Navigation",
+      icon: Briefcase,
+      action: () => setActiveTab("crm"),
+    },
+    {
+      id: "nav-income",
+      title: "Open Income Tracker",
+      category: "Navigation",
+      icon: DollarSign,
+      action: () => setActiveTab("income"),
+    },
+    {
+      id: "nav-portfolio",
+      title: "Open Creative Portfolio Gallery",
+      category: "Navigation",
+      icon: Palette,
+      action: () => setActiveTab("portfolio"),
+    },
+    {
+      id: "nav-skills",
+      title: "Open Skill Tree & Level XP",
+      category: "Navigation",
+      icon: Sparkles,
+      action: () => setActiveTab("skills"),
+    },
+    {
+      id: "nav-trophy",
+      title: "Open Trophy Room & Achievements",
+      category: "Navigation",
+      icon: Award,
+      action: () => setActiveTab("achievements"),
+    },
+    {
+      id: "nav-calendar",
+      title: "Open Color-Coded Calendar",
+      category: "Navigation",
+      icon: Calendar,
+      action: () => setActiveTab("calendar"),
+    },
+    {
+      id: "nav-journal",
+      title: "Open Daily Markdown Journal",
+      category: "Navigation",
+      icon: BookOpen,
+      action: () => setActiveTab("journal"),
+    },
+    {
+      id: "nav-goals",
+      title: "Open Editable Goals",
+      category: "Navigation",
+      icon: Target,
+      action: () => setActiveTab("goals"),
+    },
+    {
+      id: "nav-analytics",
+      title: "Open Analytics & Heatmap",
+      category: "Navigation",
+      icon: BarChart3,
+      action: () => setActiveTab("analytics"),
+    },
+    {
+      id: "nav-aicoach",
+      title: "Open Atlas AI Coach Analysis",
+      category: "Navigation",
+      icon: Sparkles,
+      action: () => setActiveTab("aicoach"),
+    },
+    {
+      id: "nav-vision",
+      title: "Open Vision Board (Dream Studio, Gear)",
+      category: "Navigation",
+      icon: Image,
+      action: () => setActiveTab("visionboard"),
+    },
+    {
+      id: "nav-quotes",
+      title: "Open Motivational Quotes",
+      category: "Navigation",
+      icon: Quote,
+      action: () => setActiveTab("quotes"),
+    },
+    {
+      id: "nav-settings",
+      title: "Open OS Settings & Backup",
+      category: "Navigation",
+      icon: Settings,
+      action: () => setActiveTab("settings"),
+    },
+    {
+      id: "act-pomo-50",
+      title: "Quick Start: Log 50/10 Deep Work Session",
+      category: "Quick Actions",
+      icon: Timer,
+      action: async () => {
+        await logPomodoro(
+          50,
+          "50/10",
+          "Quick Focus Session from Command Palette"
+        );
+        setActiveTab("pomodoro");
+      },
+    },
+    {
+      id: "act-rotate-quote",
+      title: "Rotate Today's Motivational Quote",
+      category: "Quick Actions",
+      icon: Quote,
+      action: async () => {
+        await rotateQuote();
+      },
+    },
+    {
+      id: "act-export",
+      title: "Export Full JSON Backup",
+      category: "System",
+      icon: Download,
+      action: () => {
+        window.open("/api/backup", "_blank");
+      },
+    },
+  ];
+
+  const filtered = commands.filter(
+    (c) =>
+      c.title.toLowerCase().includes(query.toLowerCase()) ||
+      c.category.toLowerCase().includes(query.toLowerCase())
+  );
+
+  return (
+    <AnimatePresence>
+      <div className="fixed inset-0 z-50 flex items-start justify-center pt-24 p-4 bg-black/70 backdrop-blur-sm">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: -10 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: -10 }}
+          className="w-full max-w-xl bg-[#121215] border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden"
+        >
+          <div className="flex items-center px-4 py-3 border-b border-zinc-800 bg-zinc-900/50">
+            <Search className="w-5 h-5 text-zinc-500 mr-3" />
+            <input
+              type="text"
+              autoFocus
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Type a command or search screens... (Cmd + K)"
+              className="w-full bg-transparent text-white placeholder-zinc-500 focus:outline-none text-sm"
+            />
+            <button
+              onClick={() => setCmdOpen(false)}
+              className="p-1 text-zinc-500 hover:text-white rounded-lg transition"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="max-h-96 overflow-y-auto p-2 divide-y divide-zinc-800/40">
+            {filtered.length === 0 ? (
+              <div className="py-8 text-center text-zinc-500 text-sm">
+                No commands match "{query}"
+              </div>
+            ) : (
+              filtered.map((cmd) => {
+                const Icon = cmd.icon;
+                return (
+                  <button
+                    key={cmd.id}
+                    onClick={() => {
+                      cmd.action();
+                      setCmdOpen(false);
+                    }}
+                    className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-zinc-800/80 text-left group transition"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-zinc-800 group-hover:bg-emerald-500/10 flex items-center justify-center text-zinc-400 group-hover:text-emerald-400 transition">
+                        <Icon className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <div className="text-sm font-medium text-zinc-200 group-hover:text-white transition">
+                          {cmd.title}
+                        </div>
+                        <div className="text-xs text-zinc-500">
+                          {cmd.category}
+                        </div>
+                      </div>
+                    </div>
+                    <ArrowRight className="w-4 h-4 text-zinc-600 group-hover:text-emerald-400 group-hover:translate-x-0.5 transition" />
+                  </button>
+                );
+              })
+            )}
+          </div>
+
+          <div className="px-4 py-2 bg-zinc-900/80 border-t border-zinc-800 text-xs text-zinc-500 flex items-center justify-between">
+            <span>
+              Use <kbd className="px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300 font-mono">↑</kbd> <kbd className="px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300 font-mono">↓</kbd> to navigate
+            </span>
+            <span>
+              <kbd className="px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300 font-mono">ESC</kbd> to close
+            </span>
+          </div>
+        </motion.div>
+      </div>
+    </AnimatePresence>
+  );
+}
